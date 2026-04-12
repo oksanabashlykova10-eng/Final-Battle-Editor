@@ -455,9 +455,10 @@ The cat is sleeping now.</textarea>
         </div>
 
         <div id="tab-export" class="tab-content">
-            <div class="control-group"><h3>Готовый код для Genially</h3>
-                <textarea id="out-iframe" readonly style="width:100%; min-height:90px; margin-bottom:10px; background:#0a0a0a; color:#0f0; outline:none; border-color:#0f0; font-family: monospace; font-size: 11px; padding: 10px; box-sizing: border-box; resize: vertical;"><iframe src="https://oksanabashlykova10-eng.github.io/Final-Battle-Editor/" width="100%" height="600" style="border:none; border-radius:10px;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe></textarea>
-                <button class="pt-btn" style="width:100%; color:#000; background:#00ff00; border-color:#00ff00; padding:10px;" onclick="copyGeniallyCode()">Скопировать код</button>
+            <div class="control-group"><h3>Ваш финальный код для Genially</h3>
+                <p style="font-size:11px; color:#aaa; margin-top:0;">Ссылка с вашими настройками генерируется <b>автоматически</b>. Просто скопируйте этот код и вставьте в Genially (Insert -> Others).</p>
+                <textarea id="out-iframe" readonly style="width:100%; min-height:90px; margin-bottom:10px; background:#0a0a0a; color:#0f0; outline:none; border-color:#0f0; font-family: monospace; font-size: 11px; padding: 10px; box-sizing: border-box; resize: vertical;"></textarea>
+                <button class="pt-btn" style="width:100%; color:#000; background:#00ff00; border-color:#00ff00; padding:10px; font-size: 14px;" onclick="copyGeniallyCode()">СКОПИРОВАТЬ ГОТОВЫЙ КОД</button>
             </div>
         </div>
 
@@ -532,8 +533,16 @@ The cat is sleeping now.</textarea>
         const canvas = document.getElementById('laser-canvas'); const ctx = canvas.getContext('2d');
         let isPlaying = false; let playTime = 60; let playTimerInt; let playLives = 3; let activeSphereId = null;
         let particles = []; let animFrame; let audioCtx = null; let heartbeatInt = null; let buildupInt = null;
+        
+        // Массив для хранения использованных вопросов
+        let usedQuestions = []; 
 
-        window.switchTab = function(id) { document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active')); event.target.classList.add('active'); document.getElementById(id).classList.add('active'); };
+        window.switchTab = function(id) { 
+            document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active')); 
+            event.target.classList.add('active'); 
+            document.getElementById(id).classList.add('active'); 
+            if(id === 'tab-export') genGeniallyCode(); 
+        };
 
         const DEF_S = 'https://img.genially.com/67961b32a116fb001568a75e/597e9623-0a2f-492d-8880-15d3be7ec62b.png';
         const DEF_F = 'https://img.genially.com/67961b32a116fb001568a75e/5233536e-2060-483e-ad27-bdca318b0bd0.png';
@@ -708,12 +717,33 @@ The cat is sleeping now.</textarea>
             });
         }
 
-        // --- ЛОГИКА ЭКСПОРТА ---
+        // --- ЛОГИКА ЭКСПОРТА И ШИФРОВАНИЯ ССЫЛКИ ---
+        window.genGeniallyCode = function() {
+            let config = {};
+            // Собираем все инпуты из панели
+            document.querySelectorAll('#editor-panel input, #editor-panel select, #editor-panel textarea').forEach(el => {
+                if(el.id && el.id !== 'out-iframe') {
+                    config[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+                }
+            });
+            // Сохраняем координаты сфер
+            config.spheres = spheresData.map(s => ({sX: s.sX, sY: s.sY, tX: s.tX, tY: s.tY}));
+
+            // Кодируем в строку URL
+            let encoded = btoa(encodeURIComponent(JSON.stringify(config)));
+            let baseUrl = "https://oksanabashlykova10-eng.github.io/Final-Battle-Editor/";
+            let finalUrl = baseUrl + "?play=1&d=" + encoded;
+
+            let iframeCode = `<iframe src="${finalUrl}" width="100%" height="600" style="border:none; border-radius:10px;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>`;
+            document.getElementById('out-iframe').value = iframeCode;
+        };
+
         window.copyGeniallyCode = function() {
             const out = document.getElementById('out-iframe');
+            if(!out.value) return;
             out.select();
             document.execCommand('copy');
-            alert("Код успешно скопирован! Теперь вы можете вставить его в Genially (вкладка Insert -> Others).");
+            alert("Код игры успешно скопирован! Теперь вы можете вставить его в Genially (вкладка Insert -> Others). Ученики не увидят панель настроек.");
         };
 
         // --- AUDIO SYSTEM ---
@@ -842,6 +872,7 @@ The cat is sleeping now.</textarea>
             isPlaying = !isPlaying; const b = document.getElementById('btn-play');
             clearInterval(heartbeatInt); heartbeatInt = null;
             clearInterval(buildupInt); buildupInt = null;
+            usedQuestions = []; // Сбрасываем использованные вопросы
             
             document.getElementById('firefly').classList.remove('f-death');
             document.getElementById('serpent').style.display = 'block'; document.getElementById('serpent').style.opacity = '1';
@@ -886,25 +917,34 @@ The cat is sleeping now.</textarea>
             setTimeout(() => { showModal(type); }, 2000); 
         }
 
+        // Защита от повторения вопросов
         function getRandQ() {
-            const types = ['choice', 'input', 'order']; const t = types[Math.floor(Math.random()*types.length)];
-            let raw = "";
-            if(t==='choice') raw = document.getElementById('db-choice').value;
-            else if(t==='input') raw = document.getElementById('db-input').value;
-            else raw = document.getElementById('db-order').value;
-            
-            const lines = raw.split('\n').filter(l => l.trim().length > 0);
-            if(lines.length === 0) return { type: 'input', q: "Нет вопросов в базе", a: "1" };
-            const l = lines[Math.floor(Math.random()*lines.length)];
-            
-            if(t==='choice' || t==='input') {
-                let sepIdx = l.indexOf('|'); 
-                if(sepIdx !== -1) { 
-                    let q = l.substring(0, sepIdx).trim(); let a = l.substring(sepIdx + 1).trim(); 
-                    return { type: t, q: q, a: a }; 
-                }
-                return { type: t, q: l, a: "1" };
-            } else { return { type: t, q: "Расставьте слова по порядку:", a: l.trim() }; }
+            let allQs = [];
+            ['choice', 'input', 'order'].forEach(t => {
+                let raw = document.getElementById('db-'+t).value;
+                let lines = raw.split('\n').filter(l => l.trim().length > 0);
+                lines.forEach(l => {
+                    if(t==='choice' || t==='input') {
+                        let sep = l.indexOf('|');
+                        if(sep !== -1) allQs.push({type: t, q: l.substring(0,sep).trim(), a: l.substring(sep+1).trim(), orig: l});
+                        else allQs.push({type: t, q: l, a: "1", orig: l});
+                    } else {
+                        allQs.push({type: t, q: "Расставьте слова по порядку:", a: l.trim(), orig: l});
+                    }
+                });
+            });
+
+            if(allQs.length === 0) return { type: 'input', q: "Нет вопросов в базе", a: "1" };
+
+            let available = allQs.filter(q => !usedQuestions.includes(q.orig));
+            if(available.length === 0) {
+                usedQuestions = []; // Сбрасываем, если все вопросы использованы
+                available = allQs;
+            }
+
+            let selected = available[Math.floor(Math.random() * available.length)];
+            usedQuestions.push(selected.orig);
+            return selected;
         }
 
         function playQ(item) {
@@ -919,7 +959,10 @@ The cat is sleeping now.</textarea>
                 const b = document.getElementById('modal-buttons'); b.innerHTML = '';
                 
                 if(qD.type === 'choice') {
-                    let opts = qD.a.split('|'); let cor = opts[0]; 
+                    // Разделяем и убираем дубликаты ответов
+                    let rawOpts = qD.a.split('|').map(x => x.trim());
+                    let cor = rawOpts[0]; 
+                    let opts = [...new Set(rawOpts)]; // Уникальные варианты
                     opts = opts.sort(() => Math.random() - 0.5); 
                     opts.forEach(o => b.innerHTML += `<button class="modal-btn-ans" onclick="chkAns(${o === cor})">${o}</button>`);
                 } else if(qD.type === 'input') {
@@ -1093,9 +1136,52 @@ The cat is sleeping now.</textarea>
 
         window.addEventListener('DOMContentLoaded', () => { 
             updateImages(); 
-            document.getElementById('inp-hp-show').dispatchEvent(new Event('input'));
-            document.getElementById('inp-hp-top').dispatchEvent(new Event('input'));
-            setTimeout(() => { renSph(); uG(); }, 200); 
+            
+            // ПРОВЕРКА НА ССЫЛКУ УЧЕНИКА
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.get('play') === '1' && urlParams.get('d')) {
+                try {
+                    let config = JSON.parse(decodeURIComponent(atob(urlParams.get('d'))));
+                    for(let key in config) {
+                        if (key === 'spheres') continue;
+                        let el = document.getElementById(key);
+                        if(el) {
+                            if(el.type === 'checkbox') el.checked = config[key];
+                            else el.value = config[key];
+                        }
+                    }
+                    if(config.spheres) {
+                        config.spheres.forEach((sConf, i) => {
+                            if(spheresData[i]) {
+                                spheresData[i].sX = sConf.sX; spheresData[i].sY = sConf.sY;
+                                spheresData[i].tX = sConf.tX; spheresData[i].tY = sConf.tY;
+                            }
+                        });
+                    }
+
+                    // Прячем редактор
+                    document.getElementById('editor-panel').style.display = 'none';
+                    document.querySelector('.preview-toolbar').style.display = 'none';
+                    document.getElementById('preview-panel').style.width = '100vw';
+
+                    // Обновляем визуал под загруженные настройки
+                    document.querySelectorAll('#editor-panel input, #editor-panel select, #editor-panel textarea').forEach(el => {
+                        if(el.id !== 'out-iframe') el.dispatchEvent(new Event('input', {bubbles:true}));
+                        if(el.tagName === 'SELECT') el.dispatchEvent(new Event('change', {bubbles:true}));
+                    });
+
+                    // Автоматически запускаем игру
+                    setTimeout(() => {
+                        if (!isPlaying) togglePlayMode();
+                    }, 300);
+
+                } catch(e) { console.error("Ошибка загрузки конфигурации", e); }
+            } else {
+                // Если мы в редакторе
+                document.getElementById('inp-hp-show').dispatchEvent(new Event('input'));
+                document.getElementById('inp-hp-top').dispatchEvent(new Event('input'));
+                setTimeout(() => { renSph(); uG(); }, 200); 
+            }
         });
     </script>
 </body>
