@@ -51,7 +51,7 @@
         #editor-panel { width: 450px; min-width: 450px; background: #1a1a1a; border-right: 2px solid #333; display: flex; flex-direction: column; z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
         
         .editor-header { padding: 15px; background: #000; border-bottom: 2px solid #00ffff; text-align: center; font-weight: bold; font-family: 'Orbitron', sans-serif; color: #00ffff; }
-        .editor-header img { height: 50px; margin-bottom: 8px; filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.5)); }
+        .editor-header img { height: 90px; margin-bottom: 8px; filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.5)); max-width: 100%; object-fit: contain; }
         .editor-header .sub-title { font-size: 11px; color: #aaa; font-family: 'Segoe UI', sans-serif; font-weight: normal; letter-spacing: 1px; margin-top: 3px; display: block; }
         
         .editor-footer { padding: 12px; background: #050505; border-top: 1px solid #333; text-align: center; font-size: 10px; color: #555; font-family: Arial, sans-serif; letter-spacing: 0.5px; }
@@ -455,12 +455,9 @@ The cat is sleeping now.</textarea>
         </div>
 
         <div id="tab-export" class="tab-content">
-            <div class="control-group"><h3>Вставка в Genially</h3>
-                <p style="font-size:11px; color:#aaa; margin-top:0;">Вставьте рабочую ссылку на вашу игру, чтобы получить готовый код для внедрения (iframe).</p>
-                <input type="text" id="inp-game-url" placeholder="Вставьте ссылку сюда..." style="width:100%; box-sizing:border-box; margin-bottom:10px; font-size:12px; padding:8px;">
-                <button class="pt-btn" style="width:100%; margin-bottom:10px; padding:10px;" onclick="genGeniallyCode()">Сгенерировать ссылку для Genially</button>
-                <textarea id="out-iframe" readonly placeholder="Здесь появится готовый код..." style="min-height:80px; margin-bottom:10px; background:#0a0a0a; color:#0f0; outline:none; border-color:#0f0;"></textarea>
-                <button class="pt-btn" style="width:100%; color:#000; background:#00ff00; border-color:#00ff00; padding:10px;" onclick="copyGeniallyCode()">Скопировать ссылку</button>
+            <div class="control-group"><h3>Готовый код для Genially</h3>
+                <textarea id="out-iframe" readonly style="width:100%; min-height:90px; margin-bottom:10px; background:#0a0a0a; color:#0f0; outline:none; border-color:#0f0; font-family: monospace; font-size: 11px; padding: 10px; box-sizing: border-box; resize: vertical;"><iframe src="https://oksanabashlykova10-eng.github.io/Final-Battle-Editor/" width="100%" height="600" style="border:none; border-radius:10px;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe></textarea>
+                <button class="pt-btn" style="width:100%; color:#000; background:#00ff00; border-color:#00ff00; padding:10px;" onclick="copyGeniallyCode()">Скопировать код</button>
             </div>
         </div>
 
@@ -712,22 +709,8 @@ The cat is sleeping now.</textarea>
         }
 
         // --- ЛОГИКА ЭКСПОРТА ---
-        window.genGeniallyCode = function() {
-            const url = document.getElementById('inp-game-url').value.trim();
-            if(!url) {
-                alert("Пожалуйста, вставьте ссылку на вашу игру.");
-                return;
-            }
-            const iframeCode = `<iframe src="${url}" width="100%" height="600" style="border:none; border-radius:10px;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>`;
-            document.getElementById('out-iframe').value = iframeCode;
-        };
-
         window.copyGeniallyCode = function() {
             const out = document.getElementById('out-iframe');
-            if(!out.value) {
-                alert("Сначала сгенерируйте код.");
-                return;
-            }
             out.select();
             document.execCommand('copy');
             alert("Код успешно скопирован! Теперь вы можете вставить его в Genially (вкладка Insert -> Others).");
