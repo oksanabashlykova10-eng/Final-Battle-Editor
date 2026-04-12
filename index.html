@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spiders (English Bootcamp) - Ultimate IDE v8.7</title>
+    <title>Final Battle Editor from English Bootcamp</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel+Decorative&family=Comfortaa&family=Cormorant&family=Exo+2&family=Kelly+Slab&family=MedievalSharp&family=Metamorphous&family=Montserrat&family=Orbitron&family=Playfair+Display&family=Special+Elite&display=swap" rel="stylesheet">
 
@@ -49,9 +49,15 @@
         
         /* --- EDITOR UI --- */
         #editor-panel { width: 450px; min-width: 450px; background: #1a1a1a; border-right: 2px solid #333; display: flex; flex-direction: column; z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        
         .editor-header { padding: 15px; background: #000; border-bottom: 2px solid #00ffff; text-align: center; font-weight: bold; font-family: 'Orbitron', sans-serif; color: #00ffff; }
+        .editor-header img { height: 50px; margin-bottom: 8px; filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.5)); }
+        .editor-header .sub-title { font-size: 11px; color: #aaa; font-family: 'Segoe UI', sans-serif; font-weight: normal; letter-spacing: 1px; margin-top: 3px; display: block; }
+        
+        .editor-footer { padding: 12px; background: #050505; border-top: 1px solid #333; text-align: center; font-size: 10px; color: #555; font-family: Arial, sans-serif; letter-spacing: 0.5px; }
+
         .tabs { display: flex; background: #222; border-bottom: 1px solid #444; flex-wrap: wrap;}
-        .tab { flex: 1 1 25%; padding: 10px 2px; text-align: center; cursor: pointer; font-size: 10px; font-weight: bold; color: #888; border-right: 1px solid #333; border-bottom: 1px solid #333;}
+        .tab { flex: 1 1 20%; padding: 10px 2px; text-align: center; cursor: pointer; font-size: 9px; font-weight: bold; color: #888; border-right: 1px solid #333; border-bottom: 1px solid #333;}
         .tab.active { background: #1a1a1a; color: #00ffff; border-bottom: 2px solid #00ffff; }
         .tab-content { padding: 15px; overflow-y: auto; flex-grow: 1; display: none; }
         .tab-content.active { display: block; }
@@ -215,14 +221,22 @@
     <svg style="width:0; height:0; position:absolute;"><defs><filter id="glitch-filter"><feTurbulence id="g-turb" type="fractalNoise" baseFrequency="0.02" numOctaves="1" result="noise"><animate id="g-anim1" attributeName="baseFrequency" values="0.02;0.05;0.02" dur="0.1s" repeatCount="indefinite" /></feTurbulence><feDisplacementMap id="g-disp" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"><animate id="g-anim2" attributeName="scale" values="0;0;0" dur="0.1s" repeatCount="indefinite" /></feDisplacementMap></filter></defs></svg>
 
     <div id="editor-panel">
-        <div class="editor-header">SPIDERS: IDE v8.7 (The Grand Finale)</div>
+        
+        <div class="editor-header">
+            <img src="https://img.genially.com/67961b32a116fb001568a75e/673752a5-8d4d-40d1-9b5f-f04ebd91a27c.png" alt="Logo">
+            <br>
+            FINAL BATTLE EDITOR
+            <span class="sub-title">from English Bootcamp</span>
+        </div>
+
         <div class="tabs">
             <div class="tab active" onclick="switchTab('tab-general')">ОБЩИЕ</div>
             <div class="tab" onclick="switchTab('tab-actors')">ГЕРОИ</div>
             <div class="tab" onclick="switchTab('tab-spheres')">СФЕРЫ</div>
-            <div class="tab" onclick="switchTab('tab-questions')">ВОПРОСЫ</div>
+            <div class="tab" onclick="switchTab('tab-questions')">ВОПРОС</div>
             <div class="tab" onclick="switchTab('tab-screens')">ЭКРАНЫ</div>
             <div class="tab" onclick="switchTab('tab-audio')">ЗВУКИ</div>
+            <div class="tab" onclick="switchTab('tab-export')" style="color:#0f0; border-color:#0f0;">ЭКСПОРТ</div>
         </div>
 
         <div id="tab-general" class="tab-content active">
@@ -439,6 +453,21 @@ The cat is sleeping now.</textarea>
                 <div class="setting-row" style="margin-top:15px; border-top: 1px solid #444; padding-top: 10px;">Поражение: <input type="text" id="inp-snd-lose" placeholder="По умолчанию (URL)" style="width:100%;"></div>
             </div>
         </div>
+
+        <div id="tab-export" class="tab-content">
+            <div class="control-group"><h3>Вставка в Genially</h3>
+                <p style="font-size:11px; color:#aaa; margin-top:0;">Вставьте рабочую ссылку на вашу игру, чтобы получить готовый код для внедрения (iframe).</p>
+                <input type="text" id="inp-game-url" placeholder="Вставьте ссылку сюда..." style="width:100%; box-sizing:border-box; margin-bottom:10px; font-size:12px; padding:8px;">
+                <button class="pt-btn" style="width:100%; margin-bottom:10px; padding:10px;" onclick="genGeniallyCode()">Сгенерировать ссылку для Genially</button>
+                <textarea id="out-iframe" readonly placeholder="Здесь появится готовый код..." style="min-height:80px; margin-bottom:10px; background:#0a0a0a; color:#0f0; outline:none; border-color:#0f0;"></textarea>
+                <button class="pt-btn" style="width:100%; color:#000; background:#00ff00; border-color:#00ff00; padding:10px;" onclick="copyGeniallyCode()">Скопировать ссылку</button>
+            </div>
+        </div>
+
+        <div class="editor-footer">
+            &copy; Все права принадлежат Башлыковой Оксане Михайловне, 2026
+        </div>
+
     </div>
 
     <div id="preview-panel">
@@ -682,17 +711,37 @@ The cat is sleeping now.</textarea>
             });
         }
 
-        // --- AUDIO SYSTEM (Лаборатория звуков) ---
+        // --- ЛОГИКА ЭКСПОРТА ---
+        window.genGeniallyCode = function() {
+            const url = document.getElementById('inp-game-url').value.trim();
+            if(!url) {
+                alert("Пожалуйста, вставьте ссылку на вашу игру.");
+                return;
+            }
+            const iframeCode = `<iframe src="${url}" width="100%" height="600" style="border:none; border-radius:10px;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>`;
+            document.getElementById('out-iframe').value = iframeCode;
+        };
+
+        window.copyGeniallyCode = function() {
+            const out = document.getElementById('out-iframe');
+            if(!out.value) {
+                alert("Сначала сгенерируйте код.");
+                return;
+            }
+            out.select();
+            document.execCommand('copy');
+            alert("Код успешно скопирован! Теперь вы можете вставить его в Genially (вкладка Insert -> Others).");
+        };
+
+        // --- AUDIO SYSTEM ---
         function playSnd(type) {
             try {
-                // Если пользователь вставил свою ссылку - играем её
                 const urlInput = document.getElementById(`inp-snd-${type}`);
                 const url = urlInput ? urlInput.value : '';
                 if(url) { new Audio(url).play().catch(e=>{}); return; }
                 
                 if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 
-                // Получаем выбранный пресет
                 const selInput = document.getElementById(`sel-snd-${type}`);
                 const style = selInput ? selInput.value : `${type}1`;
 
@@ -739,9 +788,8 @@ The cat is sleeping now.</textarea>
                     return;
                 }
 
-                // === НОВЫЕ ФАНФАРЫ ===
                 if (type === 'fanfare') {
-                    if (style === 'fan1') { // Победный марш
+                    if (style === 'fan1') { 
                         const notes = [523.25, 659.25, 783.99, 1046.50];
                         notes.forEach((freq, i) => {
                             let osc = audioCtx.createOscillator(); let g = audioCtx.createGain();
@@ -752,7 +800,7 @@ The cat is sleeping now.</textarea>
                             osc.connect(g); g.connect(audioCtx.destination);
                             osc.start(audioCtx.currentTime + i*0.15); osc.stop(audioCtx.currentTime + i*0.15 + 0.6);
                         });
-                    } else if (style === 'fan2') { // Космический триумф
+                    } else if (style === 'fan2') { 
                         let osc = audioCtx.createOscillator(); let g = audioCtx.createGain();
                         osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
                         osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.5);
@@ -761,7 +809,7 @@ The cat is sleeping now.</textarea>
                         g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
                         osc.connect(g); g.connect(audioCtx.destination);
                         osc.start(); osc.stop(audioCtx.currentTime + 1.5);
-                    } else { // Аркада
+                    } else { 
                         const notes = [440, 554.37, 659.25, 880];
                         notes.forEach((freq, i) => {
                             let osc = audioCtx.createOscillator(); let g = audioCtx.createGain();
@@ -822,7 +870,6 @@ The cat is sleeping now.</textarea>
                 document.getElementById('serpent').classList.remove('danger-pulse');
                 document.getElementById('firefly-wrap').style.left = '10%'; document.getElementById('firefly-wrap').style.top = '90%'; 
                 
-                // Сброс полоски здоровья
                 document.getElementById('hp-bar').style.width = '100%';
                 document.getElementById('hp-container').classList.remove('hp-danger');
 
@@ -985,7 +1032,6 @@ The cat is sleeping now.</textarea>
                 if(!skipFinale) {
                     triggerFinale(); 
                 } else {
-                    // ИГРАЕМ ФАНФАРЫ ИМЕННО ЗДЕСЬ (КОГДА ПОЯВЛЯЕТСЯ ПЛАШКА)
                     playSnd('fanfare');
                 }
             } else if(t === 'lose-time' || t === 'lose-lives') {
