@@ -897,7 +897,7 @@ The cat is sleeping now.</textarea>
                     if(playTime <= 0) { dieSequence('lose-time'); }
                 }, 1000);
             } else { 
-                b.innerText = "▶ ИГРАТЬ (ТЕСТ)"; b.classList.remove('active'); document.body.classList.remove('playing'); 
+                b.innerText = "▶ PLAY (ТЕСТ)"; b.classList.remove('active'); document.body.classList.remove('playing'); 
                 clearInterval(playTimerInt); closeModal(); uG(); 
                 document.getElementById('serpent').classList.remove('danger-pulse'); document.getElementById('hud-timer').classList.remove('danger');
                 document.getElementById('spheres-layer').style.display = 'block'; 
