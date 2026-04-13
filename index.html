@@ -365,7 +365,7 @@ The cat is sleeping now.</textarea>
                 <div class="setting-row">Неон рамки: <input type="checkbox" id="inp-scr-neon-on" checked> Вкл</div>
                 <div class="setting-row">Цвет рамки/неона: <input type="color" id="inp-scr-neon" value="#00ffff"></div>
                 <hr style="border-color:#444">
-                <div class="setting-row">Текст на кнопке: <input type="text" id="inp-btn-txt" value="Play again" placeholder="Play again"></div>
+                <div class="setting-row">Текст на кнопке: <input type="text" id="inp-btn-txt" value="PLAY AGAIN" placeholder="PLAY AGAIN"></div>
                 <div class="setting-row">Шрифт Кнопок: <select id="inp-btn-font"></select></div>
                 <div class="setting-row">Цвет текста кнопки: <input type="color" id="inp-btn-txt-col" value="#00ffff"></div>
                 <div class="setting-row">Цвет фона кнопки: <input type="color" id="inp-btn-bg-col" value="#000000"></div>
@@ -378,14 +378,14 @@ The cat is sleeping now.</textarea>
                 <div class="setting-row">Цвет Заголовка: <input type="color" id="inp-start-t-col" value="#00ffff"></div>
                 <div class="setting-row">Цвет Текста: <input type="color" id="inp-start-txt-col" value="#ffffff"></div>
                 <input type="text" id="inp-start-title" value="FINAL BATTLE" style="width:100%; margin-top:5px; margin-bottom:5px;">
-                <textarea id="inp-start-text" style="min-height:40px;">Activate the ancient spheres to destroy the Kukulcan virus.</textarea>
+                <textarea id="inp-start-text" style="min-height:40px;">Destroy the virus of Kukulkan by solving all tasks!</textarea>
             </div>
 
             <div class="control-group"><h3>ПОБЕДА</h3>
                 <div class="setting-row">Цвет Заголовка: <input type="color" id="inp-win-t-col" value="#00ff00"></div>
                 <div class="setting-row">Цвет Текста: <input type="color" id="inp-win-txt-col" value="#ffffff"></div>
-                <input type="text" id="inp-win-title" value="THREAT NEUTRALIZED" style="width:100%; margin-top:5px; margin-bottom:5px;">
-                <textarea id="inp-win-text" style="min-height:40px;">Quantum balance restored. System stable.</textarea>
+                <input type="text" id="inp-win-title" value="VIRUS DESTROYED" style="width:100%; margin-top:5px; margin-bottom:5px;">
+                <textarea id="inp-win-text" style="min-height:40px;">Resonance successfully activated!</textarea>
             </div>
 
             <div class="control-group"><h3>ПОРАЖЕНИЕ</h3>
@@ -393,10 +393,10 @@ The cat is sleeping now.</textarea>
                 <div class="setting-row">Цвет Текста: <input type="color" id="inp-lose-txt-col" value="#ffffff"></div>
                 <div class="setting-row" style="color:#888; margin-top:10px;">ВРЕМЯ ВЫШЛО:</div>
                 <input type="text" id="inp-lose-time-title" value="TIME IS UP" style="width:100%; margin-bottom:5px;">
-                <textarea id="inp-lose-time-text" style="min-height:40px;">The virus has overtaken the Generator. Too late.</textarea>
+                <textarea id="inp-lose-time-text" style="min-height:40px;">You didn't manage to stop Kukulkan...</textarea>
                 <div class="setting-row" style="color:#888; margin-top:10px;">НЕТ ЖИЗНЕЙ (ОШИБКИ):</div>
-                <input type="text" id="inp-lose-lives-title" value="SYSTEM CRASH" style="width:100%; margin-bottom:5px;">
-                <textarea id="inp-lose-lives-text" style="min-height:40px;">Your connection is lost. The Great Serpent corrupted your code.</textarea>
+                <input type="text" id="inp-lose-lives-title" value="SYSTEM FAILURE" style="width:100%; margin-bottom:5px;">
+                <textarea id="inp-lose-lives-text" style="min-height:40px;">Too many mistakes. The virus won.</textarea>
             </div>
         </div>
 
@@ -475,7 +475,7 @@ The cat is sleeping now.</textarea>
             <button class="pt-btn" onclick="showModal('lose-time')" style="color:#ff0000; border-color:#ff0000;">ПОРАЖЕНИЕ</button>
             <button class="pt-btn" onclick="testQuestionUI()" style="color:#fff; border-color:#fff;">ВОПРОС</button>
             <button class="pt-btn" onclick="triggerFinale()" style="color:#ffd700; border-color:#ffd700;">🏆 ТЕСТ ФИНАЛА</button>
-            <button class="pt-btn play-btn" id="btn-play" onclick="togglePlayMode()">▶ PLAY (ТЕСТ)</button>
+            <button class="pt-btn play-btn" id="btn-play" onclick="togglePlayMode()">▶ ИГРАТЬ (ТЕСТ)</button>
         </div>
         
         <div id="game-workspace">
@@ -868,18 +868,37 @@ The cat is sleeping now.</textarea>
         }
 
         // --- GAME PLAY ---
+        window.startGameplay = function() {
+            closeModal();
+            if (!isPlaying) return;
+            
+            clearInterval(playTimerInt);
+            playTimerInt = setInterval(() => {
+                playTime--; 
+                let t = document.getElementById('hud-timer'); 
+                let m = Math.floor(playTime / 60); let s = playTime % 60;
+                t.innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+                
+                if(playTime <= 10 && playTime > 0) { t.classList.add('danger'); playSnd('tick'); } else t.classList.remove('danger');
+                if(playTime <= 0) { dieSequence('lose-time'); }
+            }, 1000);
+        };
+
         window.togglePlayMode = function() {
             isPlaying = !isPlaying; const b = document.getElementById('btn-play');
             clearInterval(heartbeatInt); heartbeatInt = null;
             clearInterval(buildupInt); buildupInt = null;
+            clearInterval(playTimerInt); 
             usedQuestions = []; // Сбрасываем использованные вопросы
             
             document.getElementById('firefly').classList.remove('f-death');
             document.getElementById('serpent').style.display = 'block'; document.getElementById('serpent').style.opacity = '1';
             
             if(isPlaying) {
-                b.innerText = "⏹ СТОП (РЕДАКТОР)"; b.classList.add('active'); document.body.classList.add('playing');
-                playLives = document.getElementById('inp-lives').value; playTime = document.getElementById('inp-time').value;
+                if(b) { b.innerText = "⏹ СТОП (РЕДАКТОР)"; b.classList.add('active'); }
+                document.body.classList.add('playing');
+                playLives = parseInt(document.getElementById('inp-lives').value) || 3; 
+                playTime = parseInt(document.getElementById('inp-time').value) || 60;
                 spheresData.forEach(s => s.solved = false); updateHearts(); 
                 document.getElementById('serpent').classList.remove('danger-pulse');
                 document.getElementById('firefly-wrap').style.left = '10%'; document.getElementById('firefly-wrap').style.top = '90%'; 
@@ -889,16 +908,17 @@ The cat is sleeping now.</textarea>
 
                 document.getElementById('spheres-layer').style.display = 'block'; 
                 
-                closeModal(); showModal('start'); 
+                // Обновляем текст таймера перед стартом
+                let t = document.getElementById('hud-timer'); 
+                let m = Math.floor(playTime / 60); let ss = playTime % 60;
+                t.innerText = `${m<10?'0'+m:m}:${ss<10?'0'+ss:ss}`;
+                t.classList.remove('danger');
                 
-                playTimerInt = setInterval(() => {
-                    playTime--; let t = document.getElementById('hud-timer'); t.innerText = `00:${playTime<10?'0'+playTime:playTime}`;
-                    if(playTime <= 10 && playTime > 0) { t.classList.add('danger'); playSnd('tick'); } else t.classList.remove('danger');
-                    if(playTime <= 0) { dieSequence('lose-time'); }
-                }, 1000);
+                closeModal(); showModal('start'); 
             } else { 
-                b.innerText = "▶ PLAY (ТЕСТ)"; b.classList.remove('active'); document.body.classList.remove('playing'); 
-                clearInterval(playTimerInt); closeModal(); uG(); 
+                if(b) { b.innerText = "▶ ИГРАТЬ (ТЕСТ)"; b.classList.remove('active'); }
+                document.body.classList.remove('playing'); 
+                closeModal(); uG(); 
                 document.getElementById('serpent').classList.remove('danger-pulse'); document.getElementById('hud-timer').classList.remove('danger');
                 document.getElementById('spheres-layer').style.display = 'block'; 
             }
@@ -1044,7 +1064,7 @@ The cat is sleeping now.</textarea>
 
         window.showModal = function(t, skipFinale = false) {
             const m = document.getElementById('main-modal'); const b = document.getElementById('modal-buttons');
-            let btnTxt = document.getElementById('inp-btn-txt').value || 'Play again';
+            let btnTxt = document.getElementById('inp-btn-txt').value || 'PLAY AGAIN';
             
             m.className = 'modal modal-scr'; 
             
@@ -1071,7 +1091,7 @@ The cat is sleeping now.</textarea>
                 root.style.setProperty('--scr-text-col', document.getElementById('inp-start-txt-col').value);
                 document.getElementById('modal-title').innerText = document.getElementById('inp-start-title').value;
                 document.getElementById('modal-text').innerText = document.getElementById('inp-start-text').value;
-                b.innerHTML = `<button class="modal-btn-scr" onclick="closeModal()">PLAY</button>`;
+                b.innerHTML = `<button class="modal-btn-scr" onclick="${isPlaying ? 'startGameplay()' : 'closeModal()'}">PLAY</button>`;
             } else if(t === 'q') {
                 m.className = 'modal modal-q'; 
             }
@@ -1150,25 +1170,28 @@ The cat is sleeping now.</textarea>
                             else el.value = config[key];
                         }
                     }
-                    if(config.spheres) {
-                        config.spheres.forEach((sConf, i) => {
-                            if(spheresData[i]) {
-                                spheresData[i].sX = sConf.sX; spheresData[i].sY = sConf.sY;
-                                spheresData[i].tX = sConf.tX; spheresData[i].tY = sConf.tY;
-                            }
-                        });
-                    }
-
+                    
                     // Прячем редактор
                     document.getElementById('editor-panel').style.display = 'none';
                     document.querySelector('.preview-toolbar').style.display = 'none';
                     document.getElementById('preview-panel').style.width = '100vw';
 
-                    // Обновляем визуал под загруженные настройки
+                    // 1. Применяем настройки ко всем элементам
                     document.querySelectorAll('#editor-panel input, #editor-panel select, #editor-panel textarea').forEach(el => {
                         if(el.id !== 'out-iframe') el.dispatchEvent(new Event('input', {bubbles:true}));
                         if(el.tagName === 'SELECT') el.dispatchEvent(new Event('change', {bubbles:true}));
                     });
+
+                    // 2. ВОССТАНАВЛИВАЕМ КООРДИНАТЫ ПОСЛЕ ТОГО, КАК ПРИМЕНИЛОСЬ КОЛИЧЕСТВО СФЕР
+                    if(config.spheres) {
+                        spheresData = config.spheres.map((sConf, i) => ({
+                            id: i + 1,
+                            sX: sConf.sX, sY: sConf.sY,
+                            tX: sConf.tX, tY: sConf.tY,
+                            solved: false
+                        }));
+                        renSph();
+                    }
 
                     // Автоматически запускаем игру
                     setTimeout(() => {
